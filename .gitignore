@@ -20,3 +20,6 @@ tmp/
 *.png
 *.jpg
 *.jpeg
+!assets/*.gif
+!assets/*.png
+!assets/*.jpg

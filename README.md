@@ -19,6 +19,24 @@ A Model Context Protocol (MCP) server for conversational image generation and ed
 - **Auto-Retry**: Exponential backoff for failed API requests
 - **Cross-Platform**: Windows, macOS, and Linux support
 
+## 🎬 Demo
+
+### Image Generation with Auto-Save
+![Demo GIF](assets/demo.gif)
+
+*Generate images with natural language and automatically save to your Downloads folder*
+
+**Quick Demo Steps:**
+1. Type: `"Generate a cute cat playing with a ball"`
+2. ✅ Image created and auto-saved to `~/Downloads/gemini-images/`
+3. 📁 Open file location to view your image
+
+### Custom Path Saving
+```
+Create a sunset landscape and save to ./my-sunset.png
+→ Saves directly to your specified path
+```
+
 ## Requirements
 
 - Node.js 18 or newer
