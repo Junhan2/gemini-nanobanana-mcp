@@ -20,6 +20,10 @@ const GEMINI_ENDPOINT =
   process.env.GEMINI_IMAGE_ENDPOINT ??
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent';
 
+// Default save paths
+const DEFAULT_SAVE_DIR = process.env.DEFAULT_SAVE_DIR ?? '~/Downloads/gemini-images';
+const AUTO_SAVE = (process.env.AUTO_SAVE ?? 'true').toLowerCase() === 'true';
+
 // HTTP Security Configuration
 const MCP_HTTP_HOST = process.env.MCP_HTTP_HOST ?? '127.0.0.1';
 const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB limit
@@ -61,8 +65,7 @@ function createLogger(level: keyof typeof LOG_LEVELS) {
         ...context,
       };
 
-      const output = level === 'error' ? console.error : console.log;
-      output(JSON.stringify(logEntry));
+      console.error(JSON.stringify(logEntry));
     }
   };
 }
@@ -106,9 +109,22 @@ function validateBase64Size(base64: string): boolean {
 
 function validateFilePath(path: string): boolean {
   // Prevent path traversal attacks
-  const normalizedPath = require('path').resolve(path);
-  const basePath = require('path').resolve('.');
+  const normalizedPath = resolve(path);
+  const basePath = resolve('.');
   return normalizedPath.startsWith(basePath) && !path.includes('..') && !path.includes('~');
+}
+
+function generateDefaultFileName(tool: string, mimeType: string): string {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T');
+  const date = timestamp[0];
+  const time = timestamp[1].split('.')[0];
+  
+  const extension = mimeType === 'image/jpeg' ? 'jpg' : 'png';
+  
+  // Expand tilde in default directory
+  const expandedDir = DEFAULT_SAVE_DIR.replace(/^~/, process.env.HOME || process.env.USERPROFILE || '.');
+  
+  return `${expandedDir}/${tool}-${date}-${time}.${extension}`;
 }
 
 type InlineImageInput = {
@@ -296,54 +312,100 @@ async function callGeminiGenerate(request: GenerateRequest): Promise<{ imageBase
 async function maybeSaveImage(base64: string, mimeType: string, targetPath?: string): Promise<string | undefined> {
   if (!targetPath) return undefined;
 
-  const { writeFile, mkdir, access } = await import('node:fs/promises');
-  const { extname, dirname, basename, join } = await import('node:path');
-
-  // Determine extension from MIME type
-  const mimeToExt: Record<string, string> = {
-    'image/png': '.png',
-    'image/jpeg': '.jpg',
-    'image/jpg': '.jpg',
-    'image/webp': '.webp',
-    'image/gif': '.gif',
-  };
-
-  const detectedExt = mimeToExt[mimeType.toLowerCase()] || '.png';
-  const providedExt = extname(targetPath);
-  const extension = providedExt || detectedExt;
-
-  // Prepare base path
-  const basePath = providedExt ? targetPath : `${targetPath}${extension}`;
-  const resolved = resolve(basePath);
-  const dir = dirname(resolved);
-  const name = basename(resolved, extension);
-
-  // Create directory if it doesn't exist
   try {
-    await mkdir(dir, { recursive: true });
-  } catch {
-    // Directory might already exist
-  }
+    logger.debug('Starting image save process', { 
+      targetPath, 
+      mimeType, 
+      base64Length: base64.length 
+    });
 
-  // Handle file name collision
-  let finalPath = resolved;
-  let counter = 0;
+    const { writeFile, mkdir, access } = await import('node:fs/promises');
+    const { extname, dirname, basename, join } = await import('node:path');
 
-  while (true) {
+    // Determine extension from MIME type
+    const mimeToExt: Record<string, string> = {
+      'image/png': '.png',
+      'image/jpeg': '.jpg',
+      'image/jpg': '.jpg',
+      'image/webp': '.webp',
+      'image/gif': '.gif',
+    };
+
+    const detectedExt = mimeToExt[mimeType.toLowerCase()] || '.png';
+    const providedExt = extname(targetPath);
+    const extension = providedExt || detectedExt;
+
+    // Prepare base path
+    const basePath = providedExt ? targetPath : `${targetPath}${extension}`;
+    const resolved = resolve(basePath);
+    const dir = dirname(resolved);
+    const name = basename(resolved, extension);
+
+    logger.debug('File path resolution', {
+      originalPath: targetPath,
+      basePath,
+      resolved,
+      dir,
+      name,
+      extension
+    });
+
+    // Create directory if it doesn't exist
     try {
-      await access(finalPath);
-      // File exists, try with number suffix
-      counter++;
-      finalPath = join(dir, `${name}_${counter}${extension}`);
-    } catch {
-      // File doesn't exist, we can use this path
-      break;
+      await mkdir(dir, { recursive: true });
+      logger.debug('Directory created or already exists', { dir });
+    } catch (err) {
+      logger.error('Failed to create directory', { 
+        dir, 
+        error: (err as Error).message 
+      });
+      throw new Error(`Failed to create directory: ${(err as Error).message}`);
     }
-  }
 
-  const buffer = Buffer.from(base64, 'base64');
-  await writeFile(finalPath, buffer);
-  return finalPath;
+    // Handle file name collision
+    let finalPath = resolved;
+    let counter = 0;
+
+    while (true) {
+      try {
+        await access(finalPath);
+        // File exists, try with number suffix
+        counter++;
+        finalPath = join(dir, `${name}_${counter}${extension}`);
+        logger.debug('File exists, trying with suffix', { 
+          existingPath: finalPath.replace(`_${counter}`, ''),
+          newPath: finalPath,
+          counter
+        });
+      } catch {
+        // File doesn't exist, we can use this path
+        logger.debug('Final path determined', { finalPath });
+        break;
+      }
+    }
+
+    const buffer = Buffer.from(base64, 'base64');
+    logger.debug('Writing image buffer', { 
+      bufferSize: buffer.length,
+      finalPath
+    });
+    
+    await writeFile(finalPath, buffer);
+    
+    logger.info('Image saved successfully', { 
+      path: finalPath,
+      sizeKB: Math.round(buffer.length / 1024)
+    });
+    
+    return finalPath;
+  } catch (error) {
+    logger.error('Image save failed', {
+      targetPath,
+      error: (error as Error).message,
+      stack: (error as Error).stack
+    });
+    throw new Error(`Failed to save image: ${(error as Error).message}`);
+  }
 }
 
 const mcp = new McpServer({ name: MCP_NAME, version: '0.1.0' });
@@ -381,7 +443,10 @@ mcp.tool(
       const { prompt, saveToFilePath } = args;
       const results = await callGeminiGenerate({ prompt, saveToFilePath });
       const first = results[0];
-      const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, saveToFilePath);
+      
+      // Use default file path if AUTO_SAVE is enabled and no path provided
+      const finalSavePath = saveToFilePath || (AUTO_SAVE ? generateDefaultFileName('generate', first.mimeType) : undefined);
+      const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, finalSavePath);
       const dataUrl = `data:${first.mimeType};base64,${first.imageBase64}`;
       
       const duration = Date.now() - startTime;
@@ -394,13 +459,22 @@ mcp.tool(
         imageSizeKB: Math.round(first.imageBase64.length * 0.75 / 1024)
       });
 
-      return {
-        content: [
-          { type: 'text', text: `Generated image${savedPath ? ` saved to ${savedPath}` : ''}` },
-          { type: 'image', mimeType: first.mimeType, data: first.imageBase64 },
-          { type: 'text', text: dataUrl },
-        ],
-      };
+      // Optimize response to avoid token limit issues
+      const responseContent: any[] = [
+        { 
+          type: 'text', 
+          text: savedPath 
+            ? `✅ Image generated and saved to: ${savedPath}\n📏 Size: ${Math.round(first.imageBase64.length * 0.75 / 1024)}KB\n📄 Format: ${first.mimeType}${!args.saveToFilePath ? '\n🔄 Auto-saved (set AUTO_SAVE=false to disable)' : ''}`
+            : `✅ Image generated successfully!\n📏 Size: ${Math.round(first.imageBase64.length * 0.75 / 1024)}KB\n📄 Format: ${first.mimeType}\n\n💡 To save the image, add saveToFilePath parameter or enable AUTO_SAVE`
+        }
+      ];
+
+      // Only include image data if no file was saved (for viewing in client)
+      if (!savedPath) {
+        responseContent.push({ type: 'image', mimeType: first.mimeType, data: first.imageBase64 });
+      }
+
+      return { content: responseContent };
     } catch (error) {
       const duration = Date.now() - startTime;
       logger.error('Image generation failed', {
@@ -467,15 +541,25 @@ mcp.tool(
     };
     const results = await callGeminiGenerate({ prompt, images: [image] });
     const first = results[0];
-    const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, saveToFilePath);
-    const dataUrl = `data:${first.mimeType};base64,${first.imageBase64}`;
-    return {
-      content: [
-        { type: 'text', text: `Edited image${savedPath ? ` saved to ${savedPath}` : ''}` },
-        { type: 'image', mimeType: first.mimeType, data: first.imageBase64 },
-        { type: 'text', text: dataUrl },
-      ],
-    };
+    
+    // Use default file path if AUTO_SAVE is enabled and no path provided
+    const finalSavePath = saveToFilePath || (AUTO_SAVE ? generateDefaultFileName('edit', first.mimeType) : undefined);
+    const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, finalSavePath);
+    
+    const responseContent: any[] = [
+      { 
+        type: 'text', 
+        text: savedPath 
+          ? `✅ Image edited and saved to: ${savedPath}\n📏 Size: ${Math.round(first.imageBase64.length * 0.75 / 1024)}KB\n📄 Format: ${first.mimeType}${!saveToFilePath ? '\n🔄 Auto-saved (set AUTO_SAVE=false to disable)' : ''}`
+          : `✅ Image edited successfully!\n📏 Size: ${Math.round(first.imageBase64.length * 0.75 / 1024)}KB\n📄 Format: ${first.mimeType}`
+      }
+    ];
+
+    if (!savedPath) {
+      responseContent.push({ type: 'image', mimeType: first.mimeType, data: first.imageBase64 });
+    }
+
+    return { content: responseContent };
   }
 );
 
@@ -530,15 +614,25 @@ mcp.tool(
     };
     const results = await callGeminiGenerate({ prompt, images });
     const first = results[0];
-    const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, saveToFilePath);
-    const dataUrl = `data:${first.mimeType};base64,${first.imageBase64}`;
-    return {
-      content: [
-        { type: 'text', text: `Composed image${savedPath ? ` saved to ${savedPath}` : ''}` },
-        { type: 'image', mimeType: first.mimeType, data: first.imageBase64 },
-        { type: 'text', text: dataUrl },
-      ],
-    };
+    
+    // Use default file path if AUTO_SAVE is enabled and no path provided
+    const finalSavePath = saveToFilePath || (AUTO_SAVE ? generateDefaultFileName('compose', first.mimeType) : undefined);
+    const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, finalSavePath);
+    
+    const responseContent: any[] = [
+      { 
+        type: 'text', 
+        text: savedPath 
+          ? `✅ Images composed and saved to: ${savedPath}\n📏 Size: ${Math.round(first.imageBase64.length * 0.75 / 1024)}KB\n📄 Format: ${first.mimeType}${!saveToFilePath ? '\n🔄 Auto-saved (set AUTO_SAVE=false to disable)' : ''}`
+          : `✅ Images composed successfully!\n📏 Size: ${Math.round(first.imageBase64.length * 0.75 / 1024)}KB\n📄 Format: ${first.mimeType}`
+      }
+    ];
+
+    if (!savedPath) {
+      responseContent.push({ type: 'image', mimeType: first.mimeType, data: first.imageBase64 });
+    }
+
+    return { content: responseContent };
   }
 );
 
@@ -619,15 +713,25 @@ mcp.tool(
     } = args as { prompt?: string; baseImage: InlineImageInput; styleImage: InlineImageInput; saveToFilePath?: string };
     const results = await callGeminiGenerate({ prompt, images: [baseImage, styleImage] });
     const first = results[0];
-    const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, saveToFilePath);
-    const dataUrl = `data:${first.mimeType};base64,${first.imageBase64}`;
-    return {
-      content: [
-        { type: 'text', text: `Style transferred image${savedPath ? ` saved to ${savedPath}` : ''}` },
-        { type: 'image', mimeType: first.mimeType, data: first.imageBase64 },
-        { type: 'text', text: dataUrl },
-      ],
-    };
+    
+    // Use default file path if AUTO_SAVE is enabled and no path provided
+    const finalSavePath = saveToFilePath || (AUTO_SAVE ? generateDefaultFileName('style', first.mimeType) : undefined);
+    const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, finalSavePath);
+    
+    const responseContent: any[] = [
+      { 
+        type: 'text', 
+        text: savedPath 
+          ? `✅ Style transferred and saved to: ${savedPath}\n📏 Size: ${Math.round(first.imageBase64.length * 0.75 / 1024)}KB\n📄 Format: ${first.mimeType}${!saveToFilePath ? '\n🔄 Auto-saved (set AUTO_SAVE=false to disable)' : ''}`
+          : `✅ Style transfer completed!\n📏 Size: ${Math.round(first.imageBase64.length * 0.75 / 1024)}KB\n📄 Format: ${first.mimeType}`
+      }
+    ];
+
+    if (!savedPath) {
+      responseContent.push({ type: 'image', mimeType: first.mimeType, data: first.imageBase64 });
+    }
+
+    return { content: responseContent };
   }
 );
 

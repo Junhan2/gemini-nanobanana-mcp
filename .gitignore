@@ -17,3 +17,6 @@ tmp/
 /.vscode/
 
 
+*.png
+*.jpg
+*.jpeg

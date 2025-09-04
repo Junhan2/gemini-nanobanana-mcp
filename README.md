@@ -48,6 +48,8 @@ $env:GEMINI_API_KEY="YOUR_API_KEY"
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `GEMINI_API_KEY` | ✅ | - | Your Google AI Studio API key |
+| `AUTO_SAVE` | ❌ | `true` | Automatically save images when no path specified |
+| `DEFAULT_SAVE_DIR` | ❌ | `~/Downloads/gemini-images` | Default directory for auto-saved images |
 | `MCP_NAME` | ❌ | `gemini-nanobanana-mcp` | Server instance name |
 | `MCP_TRANSPORT` | ❌ | `stdio` | Transport mode (`stdio` or `http`) |
 | `MCP_HTTP_HOST` | ❌ | `127.0.0.1` | HTTP bind address (localhost only for security) |
@@ -56,6 +58,41 @@ $env:GEMINI_API_KEY="YOUR_API_KEY"
 | `MCP_HTTP_ENABLE_JSON` | ❌ | `false` | Enable JSON responses (vs SSE streaming) |
 | `LOG_LEVEL` | ❌ | `info` | Logging level (`error`, `warn`, `info`, `debug`) |
 | `GEMINI_IMAGE_ENDPOINT` | ❌ | Auto | Custom Gemini API endpoint URL |
+
+## 💾 Image Saving Options
+
+### Automatic Saving (Default)
+By default, all generated images are automatically saved to `~/Downloads/gemini-images/` with timestamped filenames:
+- Format: `{tool}-{date}-{time}.{extension}`
+- Example: `generate-2025-09-04-16-30-45.png`
+
+### Custom Path Saving
+Specify a custom path using the `saveToFilePath` parameter:
+```
+Generate a sunset image and save to ./my-sunset.png
+```
+
+### Disable Auto-Save
+Set `AUTO_SAVE=false` to only save when explicitly requested:
+```json
+{
+  "env": {
+    "GEMINI_API_KEY": "YOUR_API_KEY",
+    "AUTO_SAVE": "false"
+  }
+}
+```
+
+### Custom Default Directory
+Change the default save location:
+```json
+{
+  "env": {
+    "GEMINI_API_KEY": "YOUR_API_KEY",
+    "DEFAULT_SAVE_DIR": "~/Pictures/AI-Images"
+  }
+}
+```
 
 ## Security Features
 
@@ -83,7 +120,9 @@ Add to your config file:
       "command": "npx",
       "args": ["gemini-nanobanana-mcp@latest"],
       "env": {
-        "GEMINI_API_KEY": "YOUR_API_KEY"
+        "GEMINI_API_KEY": "YOUR_API_KEY",
+        "AUTO_SAVE": "true",
+        "DEFAULT_SAVE_DIR": "~/Downloads/gemini-images"
       }
     }
   }
@@ -100,6 +139,8 @@ Quick installation using CLI:
 ```bash
 claude mcp add gemini-nanobanana-mcp -s user \
   -e GEMINI_API_KEY="YOUR_API_KEY" \
+  -e AUTO_SAVE="true" \
+  -e DEFAULT_SAVE_DIR="~/Downloads/gemini-images" \
   -- npx -y gemini-nanobanana-mcp@latest
 ```
 
@@ -108,7 +149,16 @@ Or install globally:
 npm i -g gemini-nanobanana-mcp
 claude mcp add gemini-nanobanana-mcp -s user \
   -e GEMINI_API_KEY="YOUR_API_KEY" \
+  -e AUTO_SAVE="true" \
+  -e DEFAULT_SAVE_DIR="~/Downloads/gemini-images" \
   -- gemini-nanobanana-mcp
+```
+
+Minimal installation (auto-save enabled by default):
+```bash
+claude mcp add gemini-nanobanana-mcp -s user \
+  -e GEMINI_API_KEY="YOUR_API_KEY" \
+  -- npx -y gemini-nanobanana-mcp@latest
 ```
 
 Remove if needed:
@@ -142,7 +192,11 @@ code --add-mcp '{
   "name":"gemini-nanobanana-mcp",
   "command":"npx",
   "args":["gemini-nanobanana-mcp@latest"],
-  "env":{"GEMINI_API_KEY":"YOUR_API_KEY"}
+  "env":{
+    "GEMINI_API_KEY":"YOUR_API_KEY",
+    "AUTO_SAVE":"true",
+    "DEFAULT_SAVE_DIR":"~/Downloads/gemini-images"
+  }
 }'
 ```
 
@@ -161,6 +215,26 @@ claude mcp add gemini-nanobanana-mcp -s user -e GEMINI_API_KEY="YOUR_API_KEY" --
 
 # Global install
 npm i -g gemini-nanobanana-mcp
+```
+
+### Usage Examples
+
+**Auto-save (Default Behavior):**
+```
+Generate a beautiful sunset landscape
+→ Automatically saves to ~/Downloads/gemini-images/generate-2025-09-04-16-30-45.png
+```
+
+**Custom Path:**
+```
+Create a cute cat image and save to ./my-cat.png
+→ Saves to ./my-cat.png
+```
+
+**View Only (No Save):**
+```
+Generate a mountain scene (with AUTO_SAVE=false)
+→ Shows image in chat without saving
 ```
 
 ## 🛠️ Available Tools

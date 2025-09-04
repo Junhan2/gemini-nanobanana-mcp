@@ -1,6 +1,6 @@
 {
   "name": "gemini-nanobanana-mcp",
-  "version": "0.1.1",
+  "version": "0.1.6",
   "private": false,
   "description": "MCP server for Google Gemini 2.5 Flash Image preview (text-to-image, editing, composition)",
   "type": "module",
