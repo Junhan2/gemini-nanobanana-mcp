@@ -161,6 +161,11 @@ async function toInlineDataParts(
 }
 
 async function callGeminiGenerate(request: GenerateRequest): Promise<{ imageBase64: string; mimeType: string }[]> {
+  // Validate API key first
+  if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === '') {
+    throw new Error('GEMINI_API_KEY environment variable is required but not set or empty');
+  }
+
   const textPart = { text: request.prompt };
   const imageParts = await toInlineDataParts(request.images);
   const parts = [textPart, ...imageParts];
@@ -171,6 +176,14 @@ async function callGeminiGenerate(request: GenerateRequest): Promise<{ imageBase
         parts,
       },
     ],
+  });
+
+  logger.debug('Sending request to Gemini API', {
+    endpoint: GEMINI_ENDPOINT,
+    hasApiKey: !!GEMINI_API_KEY,
+    bodySize: requestBody.length,
+    parts: parts.length,
+    prompt: request.prompt.substring(0, 100) + (request.prompt.length > 100 ? '...' : ''),
   });
 
   let lastError: Error | null = null;
@@ -191,10 +204,21 @@ async function callGeminiGenerate(request: GenerateRequest): Promise<{ imageBase
 
       clearTimeout(timeoutId);
 
+      logger.debug('Received response from Gemini API', {
+        status: fetchResponse.status,
+        statusText: fetchResponse.statusText,
+        attempt: attempt + 1,
+      });
+
       if (fetchResponse.ok) {
         const json = (await fetchResponse.json()) as GeminiGenerateResponse;
         const images: { imageBase64: string; mimeType: string }[] = [];
         const first = json.candidates?.[0]?.content?.parts ?? [];
+
+        logger.debug('Processing API response', {
+          candidatesCount: json.candidates?.length ?? 0,
+          partsCount: first.length,
+        });
 
         for (const part of first) {
           if (part.inlineData?.data) {
@@ -203,14 +227,29 @@ async function callGeminiGenerate(request: GenerateRequest): Promise<{ imageBase
         }
 
         if (images.length === 0) {
+          logger.error('No image data in API response', {
+            response: JSON.stringify(json, null, 2).substring(0, 1000),
+          });
           throw new Error('No image data returned by Gemini API');
         }
+
+        logger.debug('Successfully extracted images', {
+          imageCount: images.length,
+          firstImageSize: images[0]?.imageBase64?.length ?? 0,
+        });
 
         return images;
       }
 
       // Handle error responses
       const errorText = await fetchResponse.text();
+      logger.error('Gemini API error response', {
+        status: fetchResponse.status,
+        statusText: fetchResponse.statusText,
+        errorText: errorText.substring(0, 500),
+        attempt: attempt + 1,
+      });
+      
       const error = new Error(`Gemini API error ${fetchResponse.status}: ${errorText}`);
 
       if (!shouldRetry(fetchResponse.status) || attempt === MAX_RETRIES) {
@@ -328,18 +367,53 @@ mcp.tool(
       .describe('Optional path to save the image (png/jpeg by extension)'),
   },
   async (args) => {
-    const { prompt, saveToFilePath } = args;
-    const results = await callGeminiGenerate({ prompt, saveToFilePath });
-    const first = results[0];
-    const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, saveToFilePath);
-    const dataUrl = `data:${first.mimeType};base64,${first.imageBase64}`;
-    return {
-      content: [
-        { type: 'text', text: `Generated image${savedPath ? ` saved to ${savedPath}` : ''}` },
-        { type: 'image', mimeType: first.mimeType, data: first.imageBase64 },
-        { type: 'text', text: dataUrl },
-      ],
-    };
+    const requestId = randomUUID();
+    const startTime = Date.now();
+    
+    try {
+      logger.debug('Starting image generation', { 
+        tool: 'generate_image', 
+        requestId, 
+        promptLength: args.prompt?.length,
+        hasFilePath: !!args.saveToFilePath 
+      });
+
+      const { prompt, saveToFilePath } = args;
+      const results = await callGeminiGenerate({ prompt, saveToFilePath });
+      const first = results[0];
+      const savedPath = await maybeSaveImage(first.imageBase64, first.mimeType, saveToFilePath);
+      const dataUrl = `data:${first.mimeType};base64,${first.imageBase64}`;
+      
+      const duration = Date.now() - startTime;
+      logger.info('Image generated successfully', { 
+        tool: 'generate_image', 
+        requestId, 
+        duration,
+        savedTo: savedPath,
+        mimeType: first.mimeType,
+        imageSizeKB: Math.round(first.imageBase64.length * 0.75 / 1024)
+      });
+
+      return {
+        content: [
+          { type: 'text', text: `Generated image${savedPath ? ` saved to ${savedPath}` : ''}` },
+          { type: 'image', mimeType: first.mimeType, data: first.imageBase64 },
+          { type: 'text', text: dataUrl },
+        ],
+      };
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.error('Image generation failed', {
+        tool: 'generate_image',
+        requestId,
+        duration,
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      
+      // Return user-friendly error message
+      throw new Error(`Failed to generate image: ${(error as Error).message}`);
+    }
   }
 );
 
