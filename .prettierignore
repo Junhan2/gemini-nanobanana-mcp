@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+build/
+dist/
+
+# Generated files
+*.d.ts
+
+# Config files
+package-lock.json
+*.log

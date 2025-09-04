@@ -1,0 +1,19 @@
+# Node modules and build artifacts
+node_modules/
+build/
+dist/
+
+# Env files
+.env
+.env.*
+
+# OS/editor noise
+.DS_Store
+*.log
+*.tgz
+coverage/
+tmp/
+/.idea/
+/.vscode/
+
+

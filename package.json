@@ -1,0 +1,64 @@
+{
+  "name": "gemini-nanobanana-mcp",
+  "version": "0.1.0",
+  "private": false,
+  "description": "MCP server for Google Gemini 2.5 Flash Image preview (text-to-image, editing, composition)",
+  "type": "module",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "bin": {
+    "gemini-nanobanana-mcp": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf build",
+    "dev": "tsc --watch",
+    "prepare": "npm run build",
+    "start": "node ./build/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "gemini",
+    "google",
+    "image",
+    "server"
+  ],
+  "author": "Junhan2",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Junhan2/gemini-nanobanana-mcp.git"
+  },
+  "homepage": "https://github.com/Junhan2/gemini-nanobanana-mcp",
+  "bugs": {
+    "url": "https://github.com/Junhan2/gemini-nanobanana-mcp/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.4",
+    "dotenv": "^16.6.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.2"
+  }
+}
