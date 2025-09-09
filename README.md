@@ -5,11 +5,11 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 
-> **Generate images from text with Claude!** Simply type "Draw a cute cat" and get instant AI-generated images ✨
+> **Generate images from text with Claude!** Simply type "Draw a cute cat" and get instant AI-generated images.
 
 A beginner-friendly Model Context Protocol (MCP) server that brings Google's Gemini 2.5 Flash Image generation directly into your Claude conversations.
 
-## 🚀 Quick Start - Just 3 Steps!
+## Quick Start - Just 3 Steps
 
 ### 1️⃣ Get Your API Key (1 minute)
 1. Visit [Google AI Studio](https://aistudio.google.com/apikey)
@@ -19,7 +19,7 @@ A beginner-friendly Model Context Protocol (MCP) server that brings Google's Gem
 ### 2️⃣ Install in Your Claude Client (2 minutes)
 
 <details>
-<summary><b>🖥️ Claude Desktop (Windows)</b></summary>
+<summary><b>Claude Desktop (Windows)</b></summary>
 
 1. Open **Notepad**
 2. Copy this code and replace `YOUR_API_KEY` with your actual key:
@@ -42,7 +42,7 @@ A beginner-friendly Model Context Protocol (MCP) server that brings Google's Gem
 </details>
 
 <details>
-<summary><b>🍎 Claude Desktop (Mac)</b></summary>
+<summary><b>Claude Desktop (Mac)</b></summary>
 
 1. Open **Terminal** (search "Terminal" in Spotlight)
 2. Run this command (replace `YOUR_API_KEY`):
@@ -66,7 +66,7 @@ EOF
 </details>
 
 <details>
-<summary><b>⚡ Claude Code (Easiest!)</b></summary>
+<summary><b>Claude Code (Easiest!)</b></summary>
 
 Just run this one command in your terminal (replace `YOUR_API_KEY`):
 ```bash
@@ -76,7 +76,7 @@ claude mcp add gemini-nanobanana-mcp -s user -e GEMINI_API_KEY="YOUR_API_KEY" --
 </details>
 
 <details>
-<summary><b>🎯 Cursor</b></summary>
+<summary><b>Cursor</b></summary>
 
 1. Go to `Cursor Settings` → `MCP` → `Add new MCP Server`
 2. Fill in:
@@ -91,36 +91,36 @@ claude mcp add gemini-nanobanana-mcp -s user -e GEMINI_API_KEY="YOUR_API_KEY" --
 ### 3️⃣ Start Creating! (0 minutes)
 
 Try these in Claude:
-- ✨ "Generate a cute puppy playing in a garden"
-- 🌅 "Create a beautiful sunset over mountains"
-- 🚗 "Draw a red sports car"
-- 🎨 "Make an abstract colorful painting"
+- "Generate a cute puppy playing in a garden"
+- "Create a beautiful sunset over mountains"
+- "Draw a red sports car"
+- "Make an abstract colorful painting"
 
-**Your images automatically save to** `~/Downloads/gemini-images/` 📁
+**Your images automatically save to** `~/Downloads/gemini-images/`
 
 ---
 
-## 🎬 See It In Action
+## See It In Action
 
 ### Basic Usage
 ```
 You: Generate a cozy coffee shop interior
 Claude: [Generating image...]
-✅ Image generated and saved to: ~/Downloads/gemini-images/generate-2025-01-09-14-30-45.png
-📏 Size: 1.2MB | 📄 Format: PNG
+Image generated and saved to: ~/Downloads/gemini-images/generate-2025-01-09-14-30-45.png
+Size: 1.2MB | Format: PNG
 ```
 
 ### Custom Save Location
 ```
 You: Create a sunset landscape and save it as ./my-sunset.png
-Claude: ✅ Image saved to: ./my-sunset.png
+Claude: Image saved to: ./my-sunset.png
 ```
 
 ---
 
-## 🛠️ What You Can Do
+## What You Can Do
 
-### 🎨 Text-to-Image Generation
+### Text-to-Image Generation
 Create any image you can imagine from a text description.
 
 **Examples:**
@@ -128,7 +128,7 @@ Create any image you can imagine from a text description.
 - `"Modern minimalist living room with plants"`
 - `"Vintage bicycle on a cobblestone street"`
 
-### ✏️ Image Editing
+### Image Editing
 Edit existing images with natural language instructions.
 
 **How to use:**
@@ -136,7 +136,7 @@ Edit existing images with natural language instructions.
 - Say: `"Make this image black and white"`
 - Or: `"Add a sunset background to this photo"`
 
-### 🔄 Image Composition
+### Image Composition
 Combine multiple images into one creative composition.
 
 **How to use:**
@@ -144,7 +144,7 @@ Combine multiple images into one creative composition.
 - Say: `"Combine these images into a collage"`
 - Or: `"Blend these photos together artistically"`
 
-### 🎭 Style Transfer
+### Style Transfer
 Apply the artistic style of one image to another.
 
 **How to use:**
@@ -153,7 +153,7 @@ Apply the artistic style of one image to another.
 
 ---
 
-## 🔧 Configuration Options
+## Configuration Options
 
 <details>
 <summary><b>Environment Variables</b></summary>
@@ -204,11 +204,11 @@ Then images will only appear in the chat without saving to disk.
 
 ---
 
-## 🖼️ Instant Image Preview (Claude Code)
+## Instant Image Preview (Claude Code)
 
 **Want images to open automatically after generation?** Set up Claude Code hooks for instant Quick Look previews!
 
-### 🚀 One-Click Setup (Mac)
+### One-Click Setup (Mac)
 ```bash
 # Clone this repo and run the installer
 git clone https://github.com/nanobanana/nanobanana-mcp.git
@@ -216,17 +216,17 @@ cd nanobanana-mcp
 bash hooks/install.sh
 ```
 
-### ✨ What You Get
-- ✅ **Instant Preview**: Generated images open automatically in Quick Look
-- ✅ **Zero Manual Work**: No more finding and opening files
-- ✅ **Smart Detection**: Only triggers for nanobanana image tools
-- ✅ **Press Space to Close**: Standard Quick Look controls
+### What You Get
+- **Instant Preview**: Generated images open automatically in Quick Look
+- **Zero Manual Work**: No more finding and opening files
+- **Smart Detection**: Only triggers for nanobanana image tools
+- **Press Space to Close**: Standard Quick Look controls
 
-📖 **Full setup guide**: [hooks/README.md](hooks/README.md)
+**Full setup guide**: [hooks/README.md](hooks/README.md)
 
 ---
 
-## ❓ Troubleshooting
+## Troubleshooting
 
 <details>
 <summary><b>❌ "GEMINI_API_KEY not set" error</b></summary>
@@ -240,7 +240,7 @@ bash hooks/install.sh
 </details>
 
 <details>
-<summary><b>🔍 "No such file or directory" error</b></summary>
+<summary><b>"No such file or directory" error</b></summary>
 
 **Solution:**
 1. Install Node.js from [nodejs.org](https://nodejs.org/) (choose LTS version)
@@ -250,18 +250,18 @@ bash hooks/install.sh
 </details>
 
 <details>
-<summary><b>📷 Images not generating</b></summary>
+<summary><b>Images not generating</b></summary>
 
 **Checklist:**
-- ✅ API key correctly set?
-- ✅ Internet connection working?
-- ✅ Restart Claude after configuration?
-- ✅ Try a simple prompt: "Generate a blue circle"
+- API key correctly set?
+- Internet connection working?
+- Restart Claude after configuration?
+- Try a simple prompt: "Generate a blue circle"
 
 </details>
 
 <details>
-<summary><b>💾 Images not saving automatically</b></summary>
+<summary><b>Images not saving automatically</b></summary>
 
 **Solution:**
 Check your configuration has `AUTO_SAVE: "true"` (default behavior). 
@@ -270,7 +270,7 @@ If you want to disable auto-save, set it to `"false"`.
 </details>
 
 <details>
-<summary><b>🔧 Hook setup not working</b></summary>
+<summary><b>Hook setup not working</b></summary>
 
 **Common fixes:**
 1. Make sure you're using Claude Code (not Claude Desktop)
@@ -282,15 +282,15 @@ If you want to disable auto-save, set it to `"false"`.
 
 ---
 
-## 🎯 Tips for Better Images
+## Tips for Better Images
 
-### 🎨 Prompt Writing Tips
+### Prompt Writing Tips
 - **Be specific**: "A golden retriever puppy" vs "A dog"
 - **Include style**: "in watercolor style", "photorealistic", "cartoon style"
 - **Add details**: "with blue eyes", "in a sunny garden", "wearing a red collar"
 - **Set the mood**: "cozy", "dramatic", "peaceful", "energetic"
 
-### 📐 Technical Details
+### Technical Details
 - **Supported formats**: PNG, JPEG, WebP, GIF
 - **Default output**: PNG format
 - **Image size**: Optimized for quality and reasonable file size

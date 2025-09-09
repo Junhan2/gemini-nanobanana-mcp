@@ -1,4 +1,4 @@
-# 🖼️ Claude Code Hooks for Auto Image Preview
+# Claude Code Hooks for Auto Image Preview
 
 > **Automatically open generated images instantly!** No more manually finding and opening files after image generation.
 
@@ -9,7 +9,7 @@ When you generate an image:
 
 ---
 
-## 🚀 Quick Setup (macOS)
+## Quick Setup (macOS)
 
 ### Automatic Installation (Recommended)
 
@@ -128,7 +128,7 @@ Add to your `.claude/settings.json`:
 }
 ```
 
-### 🐧 Linux Setup
+### Linux Setup
 
 **1. Create Bash Hook Script**
 
@@ -160,7 +160,7 @@ if [ -n "$image_path" ] && [ -f "$image_path" ]; then
         display "$image_path" &
     fi
     
-    echo "✅ Image opened: $(basename "$image_path")"
+    echo "Image opened: $(basename "$image_path")"
     
     # Optional: Desktop notification
     if command -v notify-send &> /dev/null; then
@@ -197,7 +197,7 @@ Add to `.claude/settings.json`:
 
 ---
 
-## ⚙️ How It Works
+## How It Works
 
 ### Hook Flow
 1. **You generate an image** → Claude Code calls the nanobanana MCP tool
@@ -218,21 +218,21 @@ The hook receives this JSON structure:
   "tool_response": [
     {
       "type": "text",
-      "text": "✅ Image generated and saved to: /path/to/image.png\n📏 Size: 1.2MB\n📄 Format: image/png"
+      "text": "Image generated and saved to: /path/to/image.png\nSize: 1.2MB\nFormat: image/png"
     }
   ]
 }
 ```
 
 **Key Points:**
-- ✅ **Correct path**: `tool_response[0].text`  
-- ❌ **Wrong path**: `tool_output` (doesn't exist)
-- ✅ **Correct matcher**: `mcp__gemini-nanobanana-mcp__.*`
-- ❌ **Wrong matcher**: `gemini-nanobanana-mcp` (missing mcp__ prefix)
+- **Correct path**: `tool_response[0].text`  
+- **Wrong path**: `tool_output` (doesn't exist)
+- **Correct matcher**: `mcp__gemini-nanobanana-mcp__.*`
+- **Wrong matcher**: `gemini-nanobanana-mcp` (missing mcp__ prefix)
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### ❌ Hook Not Executing
 

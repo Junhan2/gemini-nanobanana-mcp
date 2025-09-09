@@ -1,26 +1,26 @@
-# 🚀 5-Minute Quick Start Guide
+# 5-Minute Quick Start Guide
 
-> **Never used Claude with image generation?** This guide gets you up and running in 5 minutes, guaranteed! ⏱️
+> **Never used Claude with image generation?** This guide gets you up and running in 5 minutes, guaranteed!
 
 ## What You'll Get
-- ✨ Generate images just by typing: "Draw a cute cat"
-- 💾 Images automatically save to your Downloads folder
-- 🎨 Works with Claude Desktop, Claude Code, or Cursor
+- Generate images just by typing: "Draw a cute cat"
+- Images automatically save to your Downloads folder
+- Works with Claude Desktop, Claude Code, or Cursor
 
 ---
 
-## Step 1: Get Your API Key (1 minute) 🔑
+## Step 1: Get Your API Key (1 minute)
 
 1. **Click here**: [Google AI Studio](https://aistudio.google.com/apikey)
 2. **Sign in** with any Google account (Gmail, etc.)
 3. **Click the blue "Create API key" button**
 4. **Copy the key** (looks like: `AIzaSyB...`)
 
-✅ **Got your key?** Move to step 2!
+**Got your key?** Move to step 2!
 
 ---
 
-## Step 2: Choose Your Setup (2 minutes) 🎯
+## Step 2: Choose Your Setup (2 minutes)
 
 ### Option A: Claude Desktop (Windows)
 
@@ -93,7 +93,7 @@ claude mcp add gemini-nanobanana-mcp -s user -e GEMINI_API_KEY="PUT_YOUR_API_KEY
 
 ---
 
-## Step 3: Test It! (1 minute) 🎨
+## Step 3: Test It! (1 minute)
 
 Open Claude and type any of these:
 
@@ -111,15 +111,15 @@ Draw a red sports car
 
 **You should see:**
 ```
-✅ Image generated and saved to: ~/Downloads/gemini-images/generate-2025-01-09-14-30-45.png
-📏 Size: 1.2MB | 📄 Format: PNG
+Image generated and saved to: ~/Downloads/gemini-images/generate-2025-01-09-14-30-45.png
+Size: 1.2MB | Format: PNG
 ```
 
-**Your image is automatically saved to your Downloads folder!** 📁
+**Your image is automatically saved to your Downloads folder!**
 
 ---
 
-## 🎉 Success! What Now?
+## Success! What Now?
 
 ### Try These Commands:
 - `"Make this image black and white"` (after uploading a photo)
@@ -139,7 +139,7 @@ If you want images to automatically open after generation:
 
 ---
 
-## 🆘 Something Wrong?
+## Something Wrong?
 
 ### "GEMINI_API_KEY not set" Error
 - Double-check you replaced `PUT_YOUR_API_KEY_HERE` with your actual key
@@ -162,7 +162,7 @@ If you want images to automatically open after generation:
 
 ---
 
-## 💡 Pro Tips
+## Pro Tips
 
 1. **Be specific**: "Golden retriever puppy with blue eyes" vs "dog"
 2. **Add style**: "in watercolor style", "photorealistic", "cartoon"
@@ -171,6 +171,6 @@ If you want images to automatically open after generation:
 
 ---
 
-**🎊 That's it! You're now generating AI images with Claude!**
+**That's it! You're now generating AI images with Claude!**
 
 *Want more features? Check out the full [README.md](README.md)*
