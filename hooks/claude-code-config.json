@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "gemini-nanobanana-mcp",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ./hooks/nanobanana-image-viewer.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,8 +1,8 @@
 {
   "name": "gemini-nanobanana-mcp",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": false,
-  "description": "MCP server for Google Gemini 2.5 Flash Image preview (text-to-image, editing, composition)",
+  "description": "Generate images from text with Claude! Easy-to-install MCP server for Google Gemini 2.5 Flash Image generation, editing, and composition.",
   "type": "module",
   "main": "build/index.js",
   "types": "build/index.d.ts",
