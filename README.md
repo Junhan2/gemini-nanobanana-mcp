@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/junhan2-gemini-nanobanana-mcp-badge.png)](https://mseep.ai/app/junhan2-gemini-nanobanana-mcp)
+
 # 🎨 Gemini Nanobanana MCP
 
 [![npm version](https://badge.fury.io/js/gemini-nanobanana-mcp.svg)](https://www.npmjs.com/package/gemini-nanobanana-mcp)
